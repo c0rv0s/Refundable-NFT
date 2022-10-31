@@ -14,4 +14,8 @@ contract Test721 is ReturnableERC721 {
         createRecord(totalSupply, price, returnWindow);
         totalSupply++;
     }
+
+    function tokenURI(uint256 id) public pure override returns (string memory) {
+        return string(abi.encodePacked("uri/", id));
+    }
 }

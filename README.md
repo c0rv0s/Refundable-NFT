@@ -1,6 +1,6 @@
 # Returnable NFT
 
-NFT contracts that extend the ERC1155 and ERC721 standards allowing NFT minters to pay a premium on mint to get a refund window
+NFT contracts that extend the ERC1155 and ERC721 standards (solmate implementations) allowing NFT minters to pay a premium on mint to get a refund window
 
 ## Usage
 

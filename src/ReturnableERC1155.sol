@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "oz/token/ERC1155/ERC1155.sol";
+import "solmate/tokens/ERC1155.sol";
 
 abstract contract ReturnableERC1155 is ERC1155 {
     struct Receipt {
@@ -33,7 +33,7 @@ abstract contract ReturnableERC1155 is ERC1155 {
         );
 
         // burn token
-        _burn(_msgSender(), tokenID, amount);
+        _burn(msg.sender, tokenID, amount);
         // issue refund
         uint256 value = tokenReceipts[tokenID].pricePerUnit * amount;
         (bool sent, ) = msg.sender.call{value: value}("");
