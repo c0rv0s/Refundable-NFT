@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract ReturnableNFT {
+import "../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+
+abstract contract ReturnableERC721 is ERC721 {
     struct Receipt {
         uint256 deadline;
         uint256 price;
     }
     mapping(uint256 => Receipt) private tokenReceipts;
 
-    event TokenReturned(uint256 tokenID);
+    event TokenReturned(uint256 tokenID, uint256 refund);
     event ReceiptCreated(uint256 tokenID, uint256 price, uint256 returnWindow);
 
     /**
@@ -19,14 +21,21 @@ contract ReturnableNFT {
             tokenReceipts[tokenID].deadline != 0,
             "ReturnableNFT: receipt not found"
         );
-        if (block.timestamp <= tokenReceipts[tokenID].deadline) {
-            // TODO: burn token
-            // issue refund
-            uint256 value = tokenReceipts[tokenID].price;
-            (bool sent, ) = msg.sender.call{value: value}("");
-            require(sent, "Failed to send Ether");
-            emit TokenReturned(tokenID);
-        }
+        require(
+            block.timestamp <= tokenReceipts[tokenID].deadline,
+            "ReturnableNFT: past deadline"
+        );
+
+        // burn token
+        _burn(tokenID);
+        // issue refund
+        uint256 value = tokenReceipts[tokenID].price;
+        (bool sent, ) = msg.sender.call{value: value}("");
+        require(sent, "Failed to send Ether");
+
+        delete tokenReceipts[tokenID];
+
+        emit TokenReturned(tokenID, value);
     }
 
     /**
@@ -40,8 +49,9 @@ contract ReturnableNFT {
         virtual
         returns (uint256 premium)
     {
-        require(returnWindow <= 30 days, "ReturnableNFT: window too long");
-        premium = (returnWindow / 30 days) * mintPrice;
+        uint256 maxWindow = 30 days;
+        require(returnWindow <= maxWindow, "ReturnableNFT: window too long");
+        premium = (returnWindow * mintPrice) / maxWindow;
     }
 
     /**
@@ -54,7 +64,7 @@ contract ReturnableNFT {
         uint256 tokenID,
         uint256 mintPrice,
         uint256 returnWindow
-    ) private {
+    ) internal {
         uint256 premium = returnPrice(returnWindow, mintPrice);
         uint256 totalCost = mintPrice + premium;
         require(msg.value == totalCost, "ReturnableNFT: insufficient premium");
