@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import "oz/token/ERC721/ERC721.sol";
 
 abstract contract ReturnableERC721 is ERC721 {
     struct Receipt {
