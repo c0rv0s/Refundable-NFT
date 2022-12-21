@@ -23,8 +23,8 @@ contract CounterTest is Test {
 
         // get total price (mint price + premium for 3 day window)
         uint256 selectedWindow = 3 days;
-        uint256 unitPrice = nft1155.price() +
-            nft1155.returnPrice(selectedWindow, nft1155.price());
+        uint256 unitPrice = nft721.price() +
+            nft721.returnPrice(selectedWindow, nft721.price());
 
         // assert proper amount was charged
         nft721.mintWithReturn{value: unitPrice}(selectedWindow);
@@ -48,8 +48,8 @@ contract CounterTest is Test {
 
         // get total price (mint price + premium for 3 day window)
         uint256 selectedWindow = 3 days;
-        uint256 unitPrice = nft1155.price() +
-            nft1155.returnPrice(selectedWindow, nft1155.price());
+        uint256 unitPrice = nft721.price() +
+            nft721.returnPrice(selectedWindow, nft721.price());
 
         // assert proper amount was charged
         nft721.mintWithReturn{value: unitPrice}(selectedWindow);
