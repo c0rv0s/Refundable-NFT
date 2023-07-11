@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "../src/ReturnableERC721.sol";
 
 contract Test721 is ReturnableERC721 {
-    uint256 public price = 0.05 ether;
+    uint256 public price = 0.1 ether;
     uint256 public totalSupply;
 
     constructor() ERC721("Test", "TEST") {}

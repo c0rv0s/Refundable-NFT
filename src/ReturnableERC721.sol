@@ -8,6 +8,7 @@ abstract contract ReturnableERC721 is ERC721 {
         uint256 deadline;
         uint256 price;
     }
+
     mapping(uint256 => Receipt) private tokenReceipts;
 
     event TokenReturned(uint256 tokenID, uint256 refund);
@@ -17,20 +18,14 @@ abstract contract ReturnableERC721 is ERC721 {
      * @notice call this to return your nft
      */
     function returnToken(uint256 tokenID) external {
-        require(
-            tokenReceipts[tokenID].deadline != 0,
-            "ReturnableNFT: receipt not found"
-        );
-        require(
-            block.timestamp <= tokenReceipts[tokenID].deadline,
-            "ReturnableNFT: past deadline"
-        );
+        require(tokenReceipts[tokenID].deadline != 0, "ReturnableNFT: receipt not found");
+        require(block.timestamp <= tokenReceipts[tokenID].deadline, "ReturnableNFT: past deadline");
 
         // burn token
         _burn(tokenID);
         // issue refund
         uint256 value = tokenReceipts[tokenID].price;
-        (bool sent, ) = msg.sender.call{value: value}("");
+        (bool sent,) = msg.sender.call{value: value}("");
         require(sent, "Failed to send Ether");
 
         delete tokenReceipts[tokenID];
@@ -44,11 +39,7 @@ abstract contract ReturnableERC721 is ERC721 {
      * @param returnWindow number of seconds token can be returned during
      * @return premium total premium to be paid for given window
      */
-    function returnPrice(uint256 returnWindow, uint256 mintPrice)
-        public
-        virtual
-        returns (uint256 premium)
-    {
+    function returnPrice(uint256 returnWindow, uint256 mintPrice) public virtual returns (uint256 premium) {
         uint256 maxWindow = 30 days;
         require(returnWindow <= maxWindow, "ReturnableNFT: window too long");
         premium = (returnWindow * mintPrice) / maxWindow;
@@ -60,18 +51,11 @@ abstract contract ReturnableERC721 is ERC721 {
      * @param mintPrice base price paid for mint
      * @param returnWindow requested window of return by minter
      */
-    function createRecord(
-        uint256 tokenID,
-        uint256 mintPrice,
-        uint256 returnWindow
-    ) internal {
+    function createRecord(uint256 tokenID, uint256 mintPrice, uint256 returnWindow) internal {
         uint256 premium = returnPrice(returnWindow, mintPrice);
         uint256 totalCost = mintPrice + premium;
         require(msg.value == totalCost, "ReturnableNFT: insufficient premium");
-        tokenReceipts[tokenID] = Receipt(
-            block.timestamp + returnWindow,
-            totalCost
-        );
+        tokenReceipts[tokenID] = Receipt(block.timestamp + returnWindow, totalCost);
         emit ReceiptCreated(tokenID, mintPrice, returnWindow);
     }
 }
